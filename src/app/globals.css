@@ -1,26 +1,112 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 210 20% 95%; /* HSL(210, 20%, 95%) */
+    --foreground: 210 20% 10%; /* Derived: Darker for contrast */
+
+    --card: 0 0% 100%; /* White for cards to make them pop */
+    --card-foreground: 210 20% 10%; /* Same as main foreground */
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 10%;
+
+    --primary: 210 70% 50%; /* HSL(210, 70%, 50%) */
+    --primary-foreground: 210 70% 95%; /* Lighter for contrast on primary */
+
+    --secondary: 210 20% 88%; /* Lighter blue-gray */
+    --secondary-foreground: 210 20% 20%;
+
+    --muted: 210 20% 85%; /* Muted blue-gray */
+    --muted-foreground: 210 20% 45%; /* Darker muted text */
+
+    --accent: 180 60% 40%; /* HSL(180, 60%, 40%) */
+    --accent-foreground: 180 60% 95%; /* Lighter for contrast on accent */
+
+    --destructive: 0 70% 50%; /* A standard red for destructive actions */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 20% 80%;
+    --input: 210 20% 88%;
+    --ring: 210 70% 50%; /* Same as primary for focus rings */
+
+    --radius: 0.5rem;
+
+    /* Chart colors - can be refined or expanded */
+    --chart-1: 210 70% 50%; /* primary */
+    --chart-2: 180 60% 40%; /* accent */
+    --chart-3: 30 80% 55%; /* orange/yellowish for variation */
+    --chart-4: 280 65% 60%; /* purple for variation */
+    --chart-5: 340 75% 55%; /* pink/reddish for variation */
+
+    /* Sidebar specific colors - derived from main theme */
+    --sidebar-background: 210 20% 98%; /* Very light, almost white */
+    --sidebar-foreground: 210 20% 25%;
+    --sidebar-primary: 210 70% 50%;
+    --sidebar-primary-foreground: 210 70% 95%;
+    --sidebar-accent: 180 60% 40%;
+    --sidebar-accent-foreground: 180 60% 95%;
+    --sidebar-border: 210 20% 85%;
+    --sidebar-ring: 210 70% 50%;
+  }
+
+  .dark {
+    /* Basic dark theme, can be customized further if needed */
+    --background: 210 20% 10%;
+    --foreground: 210 20% 95%;
+
+    --card: 210 20% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 210 20% 10%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 210 70% 55%; /* Slightly brighter primary for dark mode */
+    --primary-foreground: 210 20% 10%;
+
+    --secondary: 210 20% 20%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 210 20% 25%;
+    --muted-foreground: 210 20% 65%;
+
+    --accent: 180 60% 45%; /* Slightly brighter accent for dark mode */
+    --accent-foreground: 210 20% 10%;
+
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 20% 30%;
+    --input: 210 20% 25%;
+    --ring: 210 70% 55%;
+
+    --sidebar-background: 210 20% 15%;
+    --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 210 70% 55%;
+    --sidebar-primary-foreground: 210 20% 10%;
+    --sidebar-accent: 180 60% 45%;
+    --sidebar-accent-foreground: 210 20% 10%;
+    --sidebar-border: 210 20% 25%;
+    --sidebar-ring: 210 70% 55%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-pt-sans), sans-serif; /* Default body font */
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-headline; /* Apply headline font to headings */
+  }
 }
