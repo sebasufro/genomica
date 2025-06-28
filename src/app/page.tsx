@@ -1,7 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import TestFirestoreButton from './testFirestore';
+import TestFirestoreButton from './testMongodb';
 
 export default function Home() {
   return (

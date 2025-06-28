@@ -4,12 +4,12 @@ import React from 'react';
 import { addInventoryItem } from '../lib/data'; // Ajusta la ruta si es necesario
 import type { InventoryItem, ItemType, StorageLocationType } from '../lib/types';
 
-export default function TestFirestore() {
+export default function TestMongo() {
   const handleAdd = async () => {
     const newItem = {
-      name: 'quine Genotypes Panel 1.1 100 Reacciones',
-      type: 'Reactivo' as ItemType,
-      category: 'Quimico',
+      name: 'Equine Genotypes Panel 1.1 100 Reacciones',
+      type: 'Reagent' as ItemType,
+      category: 'Químico',
       lotNumber: 'F850S',
       provider: 'Sigma-Aldrich',
       barcode: '123456789',
@@ -24,17 +24,23 @@ export default function TestFirestore() {
       temperature: '4°C',
       lastUsedDate: new Date().toISOString(),
       lowStockThreshold: 5,
-      notes: 'Testing item',
+      notes: 'Testing item with MongoDB',
       imageUrl: '',
     };
 
     try {
       const savedItem = await addInventoryItem(newItem);
-      console.log('Item saved to Firestore:', savedItem);
+      console.log('Item saved to MongoDB:', savedItem);
+      alert('Item agregado exitosamente a MongoDB!');
     } catch (error) {
       console.error('Error adding item:', error);
+      alert('Error al agregar el item');
     }
   };
 
-  return <button onClick={handleAdd}>Agregar item de prueba</button>;
+  return (
+    <div>
+      <button onClick={handleAdd}>Agregar item de prueba a MongoDB</button>
+    </div>
+  );
 }
