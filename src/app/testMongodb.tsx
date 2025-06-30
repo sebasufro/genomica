@@ -1,14 +1,12 @@
-'use client'; // Si usas Next.js App Router
+'use client';
 
 import React from 'react';
-import { addInventoryItem } from '../lib/data'; // Ajusta la ruta si es necesario
-import type { InventoryItem, ItemType, StorageLocationType } from '../lib/types';
 
 export default function TestMongo() {
   const handleAdd = async () => {
     const newItem = {
       name: 'Equine Genotypes Panel 1.1 100 Reacciones',
-      type: 'Reagent' as ItemType,
+      type: 'Reagent',
       category: 'Químico',
       lotNumber: 'F850S',
       provider: 'Sigma-Aldrich',
@@ -16,7 +14,7 @@ export default function TestMongo() {
       quantity: 100,
       unit: 'ml',
       storageLocation: {
-        type: 'Freezer' as StorageLocationType,
+        type: 'Freezer',
         name: 'Refrigerador 2',
         details: 'Freezer Refrigerador 2'
       },
@@ -29,7 +27,18 @@ export default function TestMongo() {
     };
 
     try {
-      const savedItem = await addInventoryItem(newItem);
+      const res = await fetch('/api/addItem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newItem),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Unknown error');
+      }
+
+      const savedItem = await res.json();
       console.log('Item saved to MongoDB:', savedItem);
       alert('Item agregado exitosamente a MongoDB!');
     } catch (error) {
