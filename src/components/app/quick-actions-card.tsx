@@ -1,33 +1,36 @@
-"use client";
-
-import Link from "next/link";
+import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScanLine, FileText } from "lucide-react"; // Removed Loader2
+import { ScanLine, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-// Removed unused imports: useState, useEffect, InventoryItem, data functions, Genkit flow, Dialog, format, parseISO, es
+import SimpleModal from "@/components/ui/SimpleModal";
+import BarcodeScanner from "@/components/ui/BarcodeScanner";
 
-interface QuickActionsCardProps {
-  className?: string;
-}
-
-export function QuickActionsCard({ className }: QuickActionsCardProps) {
+export function QuickActionsCard({ className }: { className?: string }) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  // Removed unused state variables: inventory, isReportLoading, isReportDialogOpen, reportContent
+  const [scannerOpen, setScannerOpen] = useState(false);
 
-  // Removed useEffect for inventory loading
-
-  const handlePlaceholderClick = (featureName: string) => {
-    toast({
-      title: "Función No Implementada",
-      description: `${featureName} está planificada para una futura actualización.`,
-      variant: "default",
-    });
+  const handleCodeDetected = async (code: string) => {
+    setScannerOpen(false);
+    try {
+      const res = await fetch(`/api/getItemByBarcode?barcode=${code}`);
+      if (res.ok) {
+        // Producto encontrado, redirige para autocompletar formulario
+        window.location.href = `/add-item?barcode=${encodeURIComponent(code)}`;
+      } else {
+        // Producto NO encontrado, igual redirige pero formulario vacío
+        window.location.href = `/add-item?barcode=${encodeURIComponent(code)}`;
+      }
+    } catch {
+      toast({
+        title: "Error consultando backend.",
+        description: "No se pudo buscar el producto.",
+        variant: "destructive",
+      });
+    }
   };
-
-  // Removed handleGenerateReport function and its AI logic
 
   return (
     <>
@@ -40,9 +43,7 @@ export function QuickActionsCard({ className }: QuickActionsCardProps) {
             <Button
               variant="outline"
               className="w-full justify-start"
-              onClick={() =>
-                handlePlaceholderClick("Escaneo de Código de Barras/QR")
-              }
+              onClick={() => setScannerOpen(true)}
             >
               <ScanLine className="mr-2 h-4 w-4" />
               Escanear Código de Barras/QR
@@ -51,14 +52,25 @@ export function QuickActionsCard({ className }: QuickActionsCardProps) {
           <Button
             variant="outline"
             className="w-full justify-start"
-            onClick={() => handlePlaceholderClick("Generación de Informes")}
+            onClick={() =>
+              toast({
+                title: "Función No Implementada",
+                description: "Generación de informes está planificada para una futura actualización.",
+                variant: "default",
+              })
+            }
           >
             <FileText className="mr-2 h-4 w-4" />
             Generar Informe
           </Button>
         </CardContent>
       </Card>
-      {/* Removed Dialog for report display */}
+      <SimpleModal open={scannerOpen} onClose={() => setScannerOpen(false)}>
+        <BarcodeScanner
+          onResult={handleCodeDetected}
+          onClose={() => setScannerOpen(false)}
+        />
+      </SimpleModal>
     </>
   );
 }

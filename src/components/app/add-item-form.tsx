@@ -36,7 +36,8 @@ import { es } from "date-fns/locale";
 import type { ItemType, StorageLocationType, InventoryItem } from "@/lib/types";
 import { addInventoryItem } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 const itemTypes: { value: ItemType; label: string }[] = [
   { value: "Reagent", label: "Reactivo" },
@@ -109,6 +110,8 @@ type AddItemFormValues = z.infer<typeof formSchema>;
 export function AddItemForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const barcode = searchParams.get("barcode");
 
   const form = useForm<AddItemFormValues>({
     resolver: zodResolver(formSchema),
@@ -125,6 +128,41 @@ export function AddItemForm() {
       lowStockThreshold: 0,
     },
   });
+
+  // AUTOCOMPLETADO POR BARCODE
+  useEffect(() => {
+    if (barcode) {
+      fetch(`/api/getItemByBarcode?barcode=${barcode}`)
+        .then((res) => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then((data) => {
+          form.reset({
+            name: data.name || "",
+            type: data.type || itemTypes[0].value,
+            category: data.category || predefinedCategories[0],
+            lotNumber: data.lotNumber || "",
+            provider: data.provider || "",
+            barcode: data.barcode || barcode,
+            quantity: 0,
+            unit: data.unit || "",
+            storageLocationType: data.storageLocation?.type || storageLocationTypes[0].value,
+            storageLocationName: data.storageLocation?.name || "",
+            storageLocationDetails: data.storageLocation?.details || "",
+            expirationDate: undefined,
+            temperature: data.temperature || "",
+            lowStockThreshold: data.lowStockThreshold || 0,
+            notes: data.notes || "",
+          });
+        })
+        .catch(() => {
+          // Si no existe, al menos precarga el barcode
+          form.setValue("barcode", barcode);
+        });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [barcode]);
 
   async function onSubmit(values: AddItemFormValues) {
     const newItemData: Omit<InventoryItem, "id" | "addedDate" | "imageUrl"> = {
@@ -147,7 +185,6 @@ export function AddItemForm() {
       temperature: values.temperature,
       lowStockThreshold: values.lowStockThreshold,
       notes: values.notes,
-      // lastUsedDate will be undefined initially
     };
 
     try {
@@ -309,6 +346,7 @@ export function AddItemForm() {
                       placeholder="Introducir o escanear código"
                       {...field}
                       className="flex-grow"
+                      // readOnly // Descomenta si quieres que sea solo lectura
                     />
                     <Button
                       type="button"
