@@ -15,6 +15,7 @@ export function QuickActionsCard({ className }: { className?: string }) {
   const handleCodeDetected = async (code: string) => {
     setScannerOpen(false);
     try {
+      //necesito un endpoint GET que busque por codigo de barra/producto en el back
       const res = await fetch(`/api/getItemByBarcode?barcode=${code}`);
       if (res.ok) {
         // Producto encontrado, redirige para autocompletar formulario
@@ -25,7 +26,7 @@ export function QuickActionsCard({ className }: { className?: string }) {
       }
     } catch {
       toast({
-        title: "Error consultando backend.",
+        title: "Error.",
         description: "No se pudo buscar el producto.",
         variant: "destructive",
       });
