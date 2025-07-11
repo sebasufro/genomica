@@ -181,7 +181,6 @@ export function getMockReagentUsageData(): ReagentUsageDataPoint[] {
   const endDate = today;
   const startDate = subDays(endDate, 6);
   const days = eachDayOfInterval({ start: startDate, end: endDate });
-
   return days.map(day => ({
     date: format(day, 'MMM dd'),
     usage: Math.floor(Math.random() * 20) + 5,
@@ -245,8 +244,7 @@ export async function updateInventoryItem(id: string, updates: Partial<Omit<Inve
 }
 
 export async function deleteInventoryItem(id: string): Promise<boolean> {
-  if (!id) return false;
-  
+  if (!id) return false;  
   try {
     const db = await getDatabase();
     const collection = db.collection(INVENTORY_COLLECTION);

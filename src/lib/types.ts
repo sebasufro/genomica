@@ -5,7 +5,7 @@ export interface InventoryItem {
   id: string;
   name: string;
   type: ItemType;
-  category: string; // User-defined or AI-suggested
+  category: string;
   lotNumber?: string;
   provider?: string;
   barcode?: string;
