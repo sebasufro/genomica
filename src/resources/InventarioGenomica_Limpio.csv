@@ -1,0 +1,30 @@
+ID Inventario;Código Producto;Nombre;Presentación;Ubicación;Rxn Restantes Kit;Precio por Unidad (Neto);Stock Inicial;Valor Inventario (Neto);Valor Inventario IVA Inc.;Cantidad Usada;Stock Final;Nivel Nuevo Pedido
+GN001;F850S;Equine Genotypes Panel 1.1 100 Reacciones;100 Rxn;Freezer Refrigerador 2;50;803.876;1;803.876;956.612;1;$-;20 rxn
+GN002;4345833;4345833 � FG DS-33 (DYE SET G5) MATRIX S;-;Freezer Refrigerador 2;-;136.080;1;136.080;161.935;1;$-;-
+GN003;4322682;Gene Scan 500 LIZ 800 Rx;800 Rxn;Freezer Refrigerador 2;700;358.389;1;358.389;426.483;1;$-;50 rxn
+GN004;4393715;POP-4 (384) POLYMER 3500 SERIE;384 Rxn;Refrigerador 2;384;171.508;4;686.032;816.378;$-;4;200 rxn
+GN005;4393708;POP-7 (384) POLYMER 3500 SERIE;384 Rxn;Refrigerador 2;250;171.508;5;857.540;1.020.473;4;1;200 rxn
+GN006;4311320;Hi-Di Formamide 25 ml;5 ml;Freezer Refrigerador 2;3 ml;30.323;2;60.646;72.169;1;1;1 ml
+GN007;4404685;4404685 - FG CAPILLARY ARRAY 8-CAP 50 CM;1600 rxn;Mueble con ruedas N�1;1200;1.140.353;0;$-;$-;2;-2;200 rxn
+GN008;4393927;4393927 - ANODE BUFFER CONTAINER 3500 SE;4 containers;Refrigerador 2;2 containers;95.789;5;478.945;569.945;4;1;1
+GN009;4408256;4408256 - CATHODE BUFFER CONTAINER 3500;4 containers;Refrigerador 2;2 containers;129.540;5;647.700;770.763;4;1;1
+GN010;N8010560;MicroAmp Optical 96 well rxn plate 10 plat;10 placas/caja;;5 placas;49.956;20;999.120;1.188.953;4;16;2 cajas
+GN011;4412614;4412614 - SEPTA 96 WELL RUO 3500 (x20);20;;10;313.824;1;313.824;373.451;1;$-;5 septas
+GN012;4393718;4393718 - CONDITIONING REAGENT 3500 SERI;Single Use;Refrigerador 2;8;25.200;5;126.000;149.940;4;1;1
+GN013;4408399;FG GENESCAN-600 LIZ SIZE STD V;-;Freezer Refrigerador 2;-;351.228;1;351.228;417.961;1;$-;-
+GN014;75001.1;EXOSAP-IT 500 RX (valor aproximado);1 ml;Freezer Refrigerador 2;0,2 ml;225.000;3;675.000;803.250;2;1;1
+GN015;4376486;BIGDYE XTERMINATOR PURIFICATION KIT;100 Rxn;Refrigerador 2;50 rxn;251.086;4;1.004.344;1.195.169;3;1;50 rxn
+GN016;4337455;Big Dye Terminator v3.1_Cycle Sequencing Kit (800 rxn);200 Rxn;Freezer Refrigerador 2;100 rxn;895.846;3;2.687.538;3.198.170;2;1;1
+GN017;4458687;4458687 - BIGDYE DIRECT CYCLE SEQ KIT 10**;200 Rxn;Freezer Refrigerador 2;200 rxn;336.000;1;336.000;399.840;$-;1;-
+GN018;4404312;4404312 SEQUENCING STANDARD V3,1 3500 S;1 Kit;Freezer Refrigerador 2;-;225.120;1;225.120;267.893;1;$-;-
+GN101;;Kit Index Nextera XT 384 Rxn (4 x 96) Dra. Mora;384 Rxn;Freezer Refrigerador 2;298;1.244.000;1;1.244.000;1.480.360;;1;96
+GN102;;AMPure XT 60 ml (Dr. Nicol�s Saavedra);60 ml;Refrigerador 2;40 ml;1.286.000;1;1.286.000;1.530.340;;1;
+GN103;;Kit Secuenciaci�n 600 ciclos v3;;;;;;;;;$-;
+GN104;;;;;;;;;;;$-;
+GN201;;Rack puntas con filtro p10, 96 U;caja 96 U;Mueble 2, Puerta 2;;5.100;10;51.000;60.690;;10;
+GN202;;Rack puntas con filtro p20, 96 U;caja 96 U;Mueble 2, Puerta 2;;5.900;4;23.600;28.084;;4;
+GN203;;Rack puntas con filtro p100, 96 U;caja 96 U;Mueble 2, Puerta 2;;5.200;9;46.800;55.692;;9;
+GN204;;Rack puntas con filtro p200, 96 U;caja 96 U;Mueble 2, Puerta 2;;5.200;9;46.800;55.692;;9;
+GN205;;Rack puntas con filtro p1000, 100 U;caja 100 U;Mueble 2, Puerta 2;;7.900;28;221.200;263.228;;28;
+24282;;Tubos 1,7 ml, bolsa 1000 U;1000 U;Mueble con ruedas N�2;;10.100;1;10.100;12.019;;1;
+Inicio;C�digo;Inicio;cantidad;Caj�n;;;;;;;$-;

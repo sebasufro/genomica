@@ -1,4 +1,7 @@
+'use client';
+
 import Image from "next/image";
+import TestFirestoreButton from './testMongodb';
 
 export default function Home() {
   return (
@@ -20,6 +23,9 @@ export default function Home() {
             </code>
             .
           </li>
+          <a>
+            <TestFirestoreButton />
+          </a>
           <li className="tracking-[-.01em]">
             Save and see your changes instantly.
           </li>
