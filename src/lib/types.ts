@@ -1,14 +1,5 @@
-export type ItemType =
-  | "Reagent"
-  | "Consumable"
-  | "Equipment Part"
-  | "General Lab Supply";
-export type StorageLocationType =
-  | "Fridge"
-  | "Freezer"
-  | "Cabinet"
-  | "Shelf"
-  | "Room Temperature";
+export type ItemType = 'Reagent' | 'Consumable' | 'Equipment Part' | 'General Lab Supply';
+export type StorageLocationType = 'Fridge' | 'Freezer' | 'Cabinet' | 'Shelf' | 'Room Temperature';
 
 export interface InventoryItem {
   id: string;

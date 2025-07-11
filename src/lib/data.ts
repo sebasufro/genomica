@@ -1,47 +1,22 @@
-import type { InventoryItem, ReagentUsageDataPoint } from "./types";
-import {
-  format,
-  formatISO,
-  addDays,
-  subDays,
-  eachDayOfInterval,
-  parseISO,
-} from "date-fns";
-import { db } from "./firebase";
-import {
-  collection,
-  doc,
-  addDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  query,
-  orderBy,
-  Timestamp,
-  // serverTimestamp // Added serverTimestamp for potential future use
-} from "firebase/firestore";
+import type { InventoryItem, ReagentUsageDataPoint } from './types';
+import { format, formatISO, addDays, subDays, eachDayOfInterval, parseISO } from 'date-fns';
+import { getDatabase } from './mongodb';
+import { ObjectId } from 'mongodb';
 
 const today = new Date();
-const INVENTORY_COLLECTION = "inventory";
+const INVENTORY_COLLECTION = 'inventory';
 
-// Helper to convert Firestore doc to InventoryItem
-const fromFirestore = (
-  docSnap: import("firebase/firestore").DocumentSnapshot
-): InventoryItem => {
-  const data = docSnap.data()!;
-
-  const convertTimestampToISO = (timestamp: any): string | undefined => {
-    if (timestamp instanceof Timestamp) {
-      return timestamp.toDate().toISOString();
+// Helper para convertir documento de MongoDB a InventoryItem
+const fromMongoDB = (doc: any): InventoryItem => {
+  const convertDateToISO = (date: any): string | undefined => {
+    if (date instanceof Date) {
+      return date.toISOString();
     }
-    // If it's already an ISO string (e.g., from client-side generation before saving)
-    if (typeof timestamp === "string") {
+    if (typeof date === 'string') {
       try {
-        parseISO(timestamp); // Check if it's a valid ISO string
-        return timestamp;
+        parseISO(date); // Verificar si es un string ISO válido
+        return date;
       } catch (e) {
-        // Not a valid ISO string, might be another format or invalid
         return undefined;
       }
     }
@@ -49,183 +24,235 @@ const fromFirestore = (
   };
 
   return {
-    id: docSnap.id,
-    name: data.name,
-    type: data.type,
-    category: data.category,
-    lotNumber: data.lotNumber,
-    provider: data.provider,
-    barcode: data.barcode,
-    quantity: data.quantity,
-    unit: data.unit,
-    storageLocation: data.storageLocation,
-    expirationDate: convertTimestampToISO(data.expirationDate),
-    temperature: data.temperature,
-    lastUsedDate: convertTimestampToISO(data.lastUsedDate),
-    addedDate:
-      convertTimestampToISO(data.addedDate) || new Date().toISOString(),
-    lowStockThreshold: data.lowStockThreshold,
-    notes: data.notes,
-    imageUrl: data.imageUrl,
+    id: doc._id.toString(),
+    name: doc.name,
+    type: doc.type,
+    category: doc.category,
+    lotNumber: doc.lotNumber,
+    provider: doc.provider,
+    barcode: doc.barcode,
+    quantity: doc.quantity,
+    unit: doc.unit,
+    storageLocation: doc.storageLocation,
+    expirationDate: convertDateToISO(doc.expirationDate),
+    temperature: doc.temperature,
+    lastUsedDate: convertDateToISO(doc.lastUsedDate),
+    addedDate: convertDateToISO(doc.addedDate) || new Date().toISOString(),
+    lowStockThreshold: doc.lowStockThreshold,
+    notes: doc.notes,
+    imageUrl: doc.imageUrl,
   };
 };
 
 export async function getInventoryItems(): Promise<InventoryItem[]> {
-  const inventoryCol = collection(db, INVENTORY_COLLECTION);
-  const q = query(inventoryCol, orderBy("addedDate", "desc"));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(fromFirestore);
-}
-
-export async function getInventoryItemById(
-  id: string
-): Promise<InventoryItem | undefined> {
-  if (!id) return undefined;
-  const docRef = doc(db, INVENTORY_COLLECTION, id);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    return fromFirestore(docSnap);
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    const docs = await collection.find({}).sort({ addedDate: -1 }).toArray();
+    return docs.map(fromMongoDB);
+  } catch (error) {
+    console.error('Error fetching inventory items:', error);
+    throw error;
   }
-  return undefined;
 }
 
-export async function getTotalItemsCount(
-  itemsParam?: InventoryItem[]
-): Promise<number> {
-  const inventory = itemsParam || (await getInventoryItems());
-  return inventory.length;
+export async function getInventoryItemById(id: string): Promise<InventoryItem | undefined> {
+  if (!id) return undefined;
+  
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    const doc = await collection.findOne({ _id: new ObjectId(id) });
+    
+    if (doc) {
+      return fromMongoDB(doc);
+    }
+    return undefined;
+  } catch (error) {
+    console.error('Error fetching inventory item by ID:', error);
+    return undefined;
+  }
 }
 
-export async function getTotalReagentsCount(
-  itemsParam?: InventoryItem[]
-): Promise<number> {
-  const inventory = itemsParam || (await getInventoryItems());
-  return inventory.filter((item) => item.type === "Reagent").length;
+export async function getTotalItemsCount(items?: InventoryItem[]): Promise<number> {
+  if (items) {
+    return items.length;
+  }
+  
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    return await collection.countDocuments({});
+  } catch (error) {
+    console.error('Error getting total items count:', error);
+    return 0;
+  }
 }
 
-export async function getLowStockItems(
-  itemsParam?: InventoryItem[]
-): Promise<InventoryItem[]> {
-  const inventory = itemsParam || (await getInventoryItems());
-  return inventory
-    .filter((item) => item.quantity <= item.lowStockThreshold)
-    .sort((a, b) => a.quantity - b.quantity);
+export async function getTotalReagentsCount(items?: InventoryItem[]): Promise<number> {
+  if (items) {
+    return items.filter(item => item.type === 'Reagent').length;
+  }
+  
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    return await collection.countDocuments({ type: 'Reagent' });
+  } catch (error) {
+    console.error('Error getting total reagents count:', error);
+    return 0;
+  }
 }
 
-export async function getNearingExpirationItems(
-  itemsParam?: InventoryItem[],
-  daysThreshold: number = 30
-): Promise<InventoryItem[]> {
-  const inventory = itemsParam || (await getInventoryItems());
-  const thresholdDate = addDays(today, daysThreshold);
-  return inventory
-    .filter(
-      (item) =>
-        item.expirationDate &&
-        parseISO(item.expirationDate) <= thresholdDate &&
-        parseISO(item.expirationDate) >= today
-    )
-    .sort(
-      (a, b) =>
-        parseISO(a.expirationDate!).getTime() -
-        parseISO(b.expirationDate!).getTime()
-    );
+export async function getLowStockItems(items?: InventoryItem[]): Promise<InventoryItem[]> {
+  if (items) {
+    return items.filter(item => item.quantity <= item.lowStockThreshold)
+                .sort((a, b) => a.quantity - b.quantity);
+  }
+  
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    const docs = await collection.find({
+      $expr: { $lte: ['$quantity', '$lowStockThreshold'] }
+    }).sort({ quantity: 1 }).toArray();
+    
+    return docs.map(fromMongoDB);
+  } catch (error) {
+    console.error('Error getting low stock items:', error);
+    return [];
+  }
 }
 
-export async function getRecentlyUsedItems(
-  itemsParam?: InventoryItem[],
-  daysThreshold: number = 7
-): Promise<InventoryItem[]> {
-  const inventory = itemsParam || (await getInventoryItems());
-  const thresholdDate = subDays(today, daysThreshold);
-  return inventory
-    .filter(
-      (item) =>
-        item.lastUsedDate && parseISO(item.lastUsedDate) >= thresholdDate
-    )
-    .sort(
-      (a, b) =>
-        parseISO(b.lastUsedDate!).getTime() -
-        parseISO(a.lastUsedDate!).getTime()
-    );
+export async function getNearingExpirationItems(items?: InventoryItem[], daysThreshold: number = 30): Promise<InventoryItem[]> {
+  if (items) {
+    const thresholdDate = addDays(today, daysThreshold);
+    return items.filter(item => 
+      item.expirationDate && 
+      parseISO(item.expirationDate) <= thresholdDate && 
+      parseISO(item.expirationDate) >= today
+    ).sort((a, b) => parseISO(a.expirationDate!).getTime() - parseISO(b.expirationDate!).getTime());
+  }
+  
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    const thresholdDate = addDays(today, daysThreshold);
+    
+    const docs = await collection.find({
+      expirationDate: {
+        $lte: thresholdDate,
+        $gte: today
+      }
+    }).sort({ expirationDate: 1 }).toArray();
+    
+    return docs.map(fromMongoDB);
+  } catch (error) {
+    console.error('Error getting nearing expiration items:', error);
+    return [];
+  }
+}
+
+export async function getRecentlyUsedItems(items?: InventoryItem[], daysThreshold: number = 7): Promise<InventoryItem[]> {
+  if (items) {
+    const thresholdDate = subDays(today, daysThreshold);
+    return items.filter(item => 
+      item.lastUsedDate && parseISO(item.lastUsedDate) >= thresholdDate
+    ).sort((a, b) => parseISO(b.lastUsedDate!).getTime() - parseISO(a.lastUsedDate!).getTime());
+  }
+  
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    const thresholdDate = subDays(today, daysThreshold);
+    
+    const docs = await collection.find({
+      lastUsedDate: { $gte: thresholdDate }
+    }).sort({ lastUsedDate: -1 }).toArray();
+    
+    return docs.map(fromMongoDB);
+  } catch (error) {
+    console.error('Error getting recently used items:', error);
+    return [];
+  }
 }
 
 export function getMockReagentUsageData(): ReagentUsageDataPoint[] {
   const endDate = today;
   const startDate = subDays(endDate, 6);
   const days = eachDayOfInterval({ start: startDate, end: endDate });
-
-  return days.map((day) => ({
-    date: format(day, "MMM dd"),
+  return days.map(day => ({
+    date: format(day, 'MMM dd'),
     usage: Math.floor(Math.random() * 20) + 5,
   }));
 }
 
-export async function addInventoryItem(
-  itemData: Omit<InventoryItem, "id" | "addedDate">
-): Promise<InventoryItem> {
-  const docData = {
-    ...itemData,
-    addedDate: formatISO(new Date()), // Always set new addedDate
-    expirationDate: itemData.expirationDate
-      ? formatISO(parseISO(itemData.expirationDate))
-      : null,
-    lastUsedDate: itemData.lastUsedDate
-      ? formatISO(parseISO(itemData.lastUsedDate))
-      : null,
-  };
+export async function addInventoryItem(itemData: Omit<InventoryItem, 'id' | 'addedDate'>): Promise<InventoryItem> {
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    
+    const docData = {
+      ...itemData,
+      addedDate: new Date(),
+      expirationDate: itemData.expirationDate ? parseISO(itemData.expirationDate) : null,
+      lastUsedDate: itemData.lastUsedDate ? parseISO(itemData.lastUsedDate) : null,
+    };
 
-  const docRef = await addDoc(collection(db, INVENTORY_COLLECTION), docData);
-
-  // Construct the returned item by spreading itemData (which doesn't have id or addedDate)
-  // and then adding the generated id and the just-created addedDate.
-  return {
-    ...(itemData as Omit<InventoryItem, "id" | "addedDate">), // Cast to satisfy spread, even though some fields are re-set
-    id: docRef.id,
-    addedDate: docData.addedDate,
-    // Ensure fields formatted for Firestore are also correctly represented in the returned object
-    expirationDate: docData.expirationDate || undefined,
-    lastUsedDate: docData.lastUsedDate || undefined,
-  };
+    const result = await collection.insertOne(docData);
+    
+    return {
+      id: result.insertedId.toString(),
+      ...itemData,
+      addedDate: docData.addedDate.toISOString(),
+    };
+  } catch (error) {
+    console.error('Error adding inventory item:', error);
+    throw error;
+  }
 }
 
-export async function updateInventoryItem(
-  id: string,
-  updates: Partial<Omit<InventoryItem, "id">>
-): Promise<InventoryItem | undefined> {
+export async function updateInventoryItem(id: string, updates: Partial<Omit<InventoryItem, 'id'>>): Promise<InventoryItem | undefined> {
   if (!id) throw new Error("Item ID is required for update.");
-  const docRef = doc(db, INVENTORY_COLLECTION, id);
-
-  const dataToUpdate: any = { ...updates };
-  if (updates.expirationDate) {
-    dataToUpdate.expirationDate = formatISO(parseISO(updates.expirationDate));
-  } else if (updates.expirationDate === null) {
-    // Handle explicit null to clear date
-    dataToUpdate.expirationDate = null;
+  
+  try {
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    
+    const dataToUpdate: any = { ...updates };
+    
+    if (updates.expirationDate) {
+      dataToUpdate.expirationDate = parseISO(updates.expirationDate);
+    }
+    if (updates.lastUsedDate) {
+      dataToUpdate.lastUsedDate = parseISO(updates.lastUsedDate);
+    }
+    if (updates.addedDate) {
+      dataToUpdate.addedDate = parseISO(updates.addedDate);
+    }
+    
+    await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: dataToUpdate }
+    );
+    
+    return getInventoryItemById(id);
+  } catch (error) {
+    console.error('Error updating inventory item:', error);
+    throw error;
   }
-
-  if (updates.lastUsedDate) {
-    dataToUpdate.lastUsedDate = formatISO(parseISO(updates.lastUsedDate));
-  } else if (updates.lastUsedDate === null) {
-    dataToUpdate.lastUsedDate = null;
-  }
-
-  if (updates.addedDate) {
-    dataToUpdate.addedDate = formatISO(parseISO(updates.addedDate));
-  }
-
-  await updateDoc(docRef, dataToUpdate);
-  return getInventoryItemById(id);
 }
 
 export async function deleteInventoryItem(id: string): Promise<boolean> {
-  if (!id) return false;
+  if (!id) return false;  
   try {
-    const docRef = doc(db, INVENTORY_COLLECTION, id);
-    await deleteDoc(docRef);
-    return true;
+    const db = await getDatabase();
+    const collection = db.collection(INVENTORY_COLLECTION);
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    
+    return result.deletedCount === 1;
   } catch (error) {
-    console.error("Error deleting item from Firestore: ", error);
+    console.error("Error deleting item from MongoDB:", error);
     return false;
   }
 }
