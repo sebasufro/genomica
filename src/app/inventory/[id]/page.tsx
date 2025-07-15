@@ -197,7 +197,6 @@ export default function InventoryItemDetailPage() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled>
             {" "}
-            {/* TODO: Implement Edit functionality */}
             <Edit className="mr-2 h-4 w-4" />
             Editar
           </Button>

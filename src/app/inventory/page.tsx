@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { es } from "date-fns/locale";
-import { parseISO } from "date-fns";
+import { addDays, parseISO, subDays } from "date-fns";
 
 export default function InventoryPage() {
   const [allItems, setAllItems] = useState<InventoryItem[]>([]); // Stores all fetched items
