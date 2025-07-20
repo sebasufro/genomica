@@ -72,7 +72,7 @@ const getStatusBadge = (item: InventoryItem) => {
           </Badge>
         );
       }
-    } catch (e) {
+    } catch {
       console.error(
         "Formato de fecha de expiración inválido:",
         item.expirationDate

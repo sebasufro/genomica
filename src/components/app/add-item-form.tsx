@@ -34,7 +34,6 @@ import { cn } from "@/lib/utils";
 import { format, formatISO } from "date-fns";
 import { es } from "date-fns/locale";
 import type { ItemType, StorageLocationType, InventoryItem } from "@/lib/types";
-import { addInventoryItem } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -188,7 +187,18 @@ export function AddItemForm() {
     };
 
     try {
-      const addedItem = await addInventoryItem(newItemData);
+      const res = await fetch("/api/addItem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newItemData),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Unknown error");
+      }
+
+      const addedItem = await res.json();
       toast({
         title: "Insumo Añadido",
         description: `${addedItem.name} ha sido añadido al inventario exitosamente.`,

@@ -4,25 +4,14 @@ import { Card, CardTitle, CardDescription, CardContent, CardFooter, CardHeader }
 import { Badge } from '@/components/ui/badge';
 import type { InventoryItem } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Package, Thermometer, CalendarClock, MapPin, Layers, FlaskConical, GripVertical, AlertTriangle } from 'lucide-react';
+import { Package, Thermometer, CalendarClock, MapPin, AlertTriangle } from 'lucide-react';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface InventoryItemCardProps {
   item: InventoryItem;
 }
-
-const getItemIcon = (type: InventoryItem['type']) => {
-  switch (type) {
-    case 'Reagent': return <FlaskConical className="h-4 w-4" />;
-    case 'Consumable': return <GripVertical className="h-4 w-4" />;
-    case 'Equipment Part': return <Layers className="h-4 w-4" />;
-    case 'General Lab Supply': return <Package className="h-4 w-4" />;
-    default: return <Package className="h-4 w-4" />;
-  }
-};
 
 
 export function InventoryItemCard({ item }: InventoryItemCardProps) {

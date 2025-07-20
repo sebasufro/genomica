@@ -3,11 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { InventoryItem } from "@/lib/types";
-import {
-  getInventoryItemById,
-  updateInventoryItem,
-  deleteInventoryItem,
-} from "@/lib/data";
 import { ItemDetailDisplay } from "@/components/app/item-detail-display";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,7 +57,8 @@ export default function InventoryItemDetailPage() {
     if (id) {
       setIsLoading(true);
       try {
-        const fetchedItem = await getInventoryItemById(id);
+        const res = await fetch(`/api/inventory/${id}`);
+        const fetchedItem = await res.json();
         setItem(fetchedItem ?? null); // Set to null if undefined
       } catch (error) {
         console.error("Error fetching item:", error);
@@ -96,10 +92,21 @@ export default function InventoryItemDetailPage() {
     }
     setIsSubmitting(true);
     try {
-      const updatedItem = await updateInventoryItem(item.id, {
-        quantity: item.quantity - useQuantity,
-        lastUsedDate: formatISO(new Date()),
+      const res = await fetch(`/api/inventory/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quantity: item.quantity - useQuantity,
+          lastUsedDate: formatISO(new Date()),
+        }),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Unknown error");
+      }
+
+      const updatedItem = await res.json();
       if (updatedItem) {
         setItem(updatedItem);
         toast({
@@ -131,20 +138,20 @@ export default function InventoryItemDetailPage() {
     if (!item) return;
     setIsSubmitting(true);
     try {
-      const success = await deleteInventoryItem(item.id);
-      if (success) {
-        toast({
-          title: "Insumo Eliminado",
-          description: `${item.name} ha sido eliminado del inventario.`,
-        });
-        router.push("/inventory");
-      } else {
-        toast({
-          title: "Error",
-          description: "Error al eliminar el insumo.",
-          variant: "destructive",
-        });
+      const res = await fetch(`/api/inventory/${item.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Unknown error");
       }
+
+      toast({
+        title: "Insumo Eliminado",
+        description: `${item.name} ha sido eliminado del inventario.`,
+      });
+      router.push("/inventory");
     } catch (error) {
       console.error("Error deleting item:", error);
       toast({
@@ -219,7 +226,7 @@ export default function InventoryItemDetailPage() {
                 </AlertDialogTitle>
                 <AlertDialogDescription>
                   Esta acción no se puede deshacer. Esto eliminará
-                  permanentemente "{item.name}" de tu inventario.
+                  permanentemente &quot;{item.name}&quot; de tu inventario.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

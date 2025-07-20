@@ -1,14 +1,14 @@
 import type { InventoryItem, ReagentUsageDataPoint } from './types';
-import { format, formatISO, addDays, subDays, eachDayOfInterval, parseISO } from 'date-fns';
+import { format, addDays, subDays, eachDayOfInterval, parseISO } from 'date-fns';
 import { getDatabase } from './mongodb';
-import { ObjectId } from 'mongodb';
+import { ObjectId, WithId, Document } from 'mongodb';
 
 const today = new Date();
 const INVENTORY_COLLECTION = 'inventory';
 
 // Helper para convertir documento de MongoDB a InventoryItem
-const fromMongoDB = (doc: any): InventoryItem => {
-  const convertDateToISO = (date: any): string | undefined => {
+const fromMongoDB = (doc: WithId<Document>): InventoryItem => {
+  const convertDateToISO = (date: Date | string): string | undefined => {
     if (date instanceof Date) {
       return date.toISOString();
     }
@@ -16,7 +16,7 @@ const fromMongoDB = (doc: any): InventoryItem => {
       try {
         parseISO(date); // Verificar si es un string ISO válido
         return date;
-      } catch (e) {
+      } catch {
         return undefined;
       }
     }
@@ -219,16 +219,16 @@ export async function updateInventoryItem(id: string, updates: Partial<Omit<Inve
     const db = await getDatabase();
     const collection = db.collection(INVENTORY_COLLECTION);
     
-    const dataToUpdate: any = { ...updates };
+    const dataToUpdate: Partial<InventoryItem> = { ...updates };
     
     if (updates.expirationDate) {
-      dataToUpdate.expirationDate = parseISO(updates.expirationDate);
+      dataToUpdate.expirationDate = new Date(updates.expirationDate).toISOString();
     }
     if (updates.lastUsedDate) {
-      dataToUpdate.lastUsedDate = parseISO(updates.lastUsedDate);
+      dataToUpdate.lastUsedDate = new Date(updates.lastUsedDate).toISOString();
     }
     if (updates.addedDate) {
-      dataToUpdate.addedDate = parseISO(updates.addedDate);
+      dataToUpdate.addedDate = new Date(updates.addedDate).toISOString();
     }
     
     await collection.updateOne(

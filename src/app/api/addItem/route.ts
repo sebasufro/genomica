@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { addInventoryItem } from "../../../lib/data";
-import type { InventoryItem } from "../../../lib/types";
 
 export async function POST(req: NextRequest) {
   try {

@@ -2,16 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import type { InventoryItem, ItemType } from "@/lib/types";
-import {
-  getInventoryItems,
-  getLowStockItems,
-  getNearingExpirationItems,
-  getRecentlyUsedItems,
-} from "@/lib/data";
 import { InventoryItemCard } from "@/components/app/inventory-item-card";
 import { InventoryFilter } from "@/components/app/inventory-filter";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { ListFilter, Loader2 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -21,8 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { es } from "date-fns/locale";
-import { parseISO } from "date-fns";
+import { parseISO, addDays, subDays } from "date-fns";
 
 export default function InventoryPage() {
   const [allItems, setAllItems] = useState<InventoryItem[]>([]); // Stores all fetched items
@@ -39,7 +31,8 @@ export default function InventoryPage() {
     const fetchItems = async () => {
       setIsLoading(true);
       try {
-        const fetchedItems = await getInventoryItems();
+        const res = await fetch("/api/inventory");
+        const fetchedItems = await res.json();
         setAllItems(fetchedItems);
       } catch (error) {
         console.error("Error fetching inventory items:", error);
@@ -52,7 +45,6 @@ export default function InventoryPage() {
   }, []);
 
   useEffect(() => {
-    const filterParam = searchParams.get("filter");
     // The actual filtering based on filterParam is now done within filteredAndSortedItems memo
     // This effect can be used if you need to set initial filter states based on URL
     const categoryParam = searchParams.get("category");
@@ -163,8 +155,8 @@ export default function InventoryPage() {
 
     const [sortKey, sortOrder] = sortBy.split("-");
     tempItems.sort((a, b) => {
-      let valA = (a as any)[sortKey];
-      let valB = (b as any)[sortKey];
+      let valA = a[sortKey as keyof InventoryItem];
+      let valB = b[sortKey as keyof InventoryItem];
 
       if (
         sortKey === "expirationDate" ||
@@ -172,19 +164,16 @@ export default function InventoryPage() {
         sortKey === "lastUsedDate"
       ) {
         valA = valA
-          ? parseISO(valA).getTime()
+          ? parseISO(valA as string).getTime()
           : sortOrder === "asc"
           ? Infinity
           : -Infinity;
         valB = valB
-          ? parseISO(valB).getTime()
+          ? parseISO(valB as string).getTime()
           : sortOrder === "asc"
           ? Infinity
           : -Infinity;
-      } else if (typeof valA === "string" && typeof valB === "string") {
-        valA = valA.toLowerCase();
-        valB = valB.toLowerCase();
-      } else if (typeof valA === "number" && typeof valB === "number") {
+      } else if (typeof valA === 'number' && typeof valB === 'number') {
         // Keep as numbers
       } else {
         valA = String(valA).toLowerCase();

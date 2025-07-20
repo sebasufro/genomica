@@ -21,11 +21,11 @@ const BarcodeScanner: React.FC<Props> = ({ onResult, onClose }) => {
     );
 
     scanner.render(
-      (decodedText) => {
+      (decodedText: string) => {
         scanner.clear().then(onClose);
         onResult(decodedText);
       },
-      (error) => {
+      () => {
         // Puedes mostrar el error si lo deseas
       }
     );
@@ -33,7 +33,7 @@ const BarcodeScanner: React.FC<Props> = ({ onResult, onClose }) => {
     return () => {
       scanner.clear();
     };
-  }, []);
+  }, [onClose, onResult]);
 
   return (
     <div>

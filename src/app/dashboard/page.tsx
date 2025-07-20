@@ -2,21 +2,11 @@
 
 import { useState, useEffect } from "react";
 import type { InventoryItem, ReagentUsageDataPoint } from "@/lib/types";
-import {
-  getInventoryItems,
-  getLowStockItems,
-  getNearingExpirationItems,
-  getRecentlyUsedItems,
-  getTotalItemsCount,
-  getTotalReagentsCount,
-  getMockReagentUsageData,
-} from "@/lib/data";
 import { DashboardMetricCard } from "@/components/app/dashboard-metric-card";
 import { QuickActionsCard } from "@/components/app/quick-actions-card";
 import { ReagentUsageChart } from "@/components/app/reagent-usage-chart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  AlertTriangle,
   Archive,
   CalendarClock,
   FlaskConical,
@@ -56,31 +46,10 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        const inventory = await getInventoryItems();
-
-        const [
-          totalItemsCount,
-          totalReagentsCount,
-          lowStockItems,
-          nearingExpirationItems,
-          recentlyUsedItems,
-        ] = await Promise.all([
-          getTotalItemsCount(inventory),
-          getTotalReagentsCount(inventory),
-          getLowStockItems(inventory),
-          getNearingExpirationItems(inventory, 30),
-          getRecentlyUsedItems(inventory, 7),
-        ]);
-
-        setStats({
-          totalItems: totalItemsCount,
-          totalReagents: totalReagentsCount,
-          lowStock: lowStockItems,
-          nearingExpiration: nearingExpirationItems,
-          recentlyUsed: recentlyUsedItems,
-        });
-
-        setReagentUsageData(getMockReagentUsageData());
+        const res = await fetch("/api/dashboard");
+        const { stats, reagentUsageData } = await res.json();
+        setStats(stats);
+        setReagentUsageData(reagentUsageData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         // Optionally, set an error state and display a message to the user

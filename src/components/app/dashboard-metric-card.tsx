@@ -84,9 +84,6 @@ export function DashboardMetricCard({
       }
       return String(value);
     }
-    if (typeof itemDescriptionKey === "function" && items.length === 0) {
-      return itemDescriptionKey({} as InventoryItem);
-    }
     return item.category || "Detalles no disponibles";
   };
 

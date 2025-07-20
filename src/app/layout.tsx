@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Poppins, PT_Sans } from "next/font/google";
 import "./globals.css";
 import {
   SidebarProvider,
@@ -18,18 +17,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Home, List, PlusSquare, UserCircle, BarChart3 } from "lucide-react"; // Using BarChart3 for GenAI logo placeholder
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-});
-
-const ptSans = PT_Sans({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-pt-sans",
-});
-
 export const metadata: Metadata = {
   title: "Rastreador de Inventario Genómico",
   description:
@@ -42,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${poppins.variable} ${ptSans.variable}`}>
+    <html lang="es">
       <head>{/* Google Fonts are now handled by next/font imports */}</head>
       <body className="font-body antialiased">
         <SidebarProvider defaultOpen={true}>
@@ -51,7 +38,7 @@ export default function RootLayout({
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-8 w-8 text-primary" />
                 <h1 className="text-xl font-headline font-semibold">
-                  Genomic IT
+                  BioTrackr
                 </h1>
               </div>
             </SidebarHeader>
