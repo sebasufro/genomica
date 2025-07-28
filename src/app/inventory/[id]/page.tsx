@@ -39,7 +39,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { format, formatISO, parseISO } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
 // Types for usage data
@@ -48,6 +48,13 @@ interface UsageHistoryItem {
 	quantityUsed: number;
 	notes?: string;
 	userId?: string;
+}
+
+interface HistoryItem {
+    date: string;
+    quantityUsed: number;
+    notes?: string;
+    userId?: string;
 }
 
 interface UsageStats {
@@ -101,11 +108,11 @@ export default function InventoryItemDetailPage() {
 		setLoadingUsageData(true);
 		try {
 			// Fetch usage history
-			const historyRes = await fetch(`/api/inventory/${id}/usage-history`);
+			const historyRes = await fetch(`/api/inventory/history/${id}`);
 			if (historyRes.ok) {
 				const history = await historyRes.json();
 				setUsageHistory(
-					history.map((item: any) => ({
+					history.map((item: HistoryItem) => ({
 						...item,
 						date: new Date(item.date),
 					}))
@@ -263,11 +270,11 @@ export default function InventoryItemDetailPage() {
 					</Link>
 				</Button>
 				<div className="flex gap-2">
-					<Button variant="outline" size="sm" disabled>
-						{" "}
-						{/* TODO: Implement Edit functionality */}
-						<Edit className="mr-2 h-4 w-4" />
-						Editar
+					<Button asChild variant="outline" size="sm">
+          				<Link href={`/inventory/${item.id}/edit`} passHref>
+							<Edit className="mr-2 h-4 w-4" />
+          				  	Editar
+          				</Link>
 					</Button>
 					<AlertDialog>
 						<AlertDialogTrigger asChild>
@@ -337,7 +344,7 @@ export default function InventoryItemDetailPage() {
 												Math.max(1, parseInt(e.target.value, 10) || 1)
 											)
 										}
-										min="1"
+										min="0"
 										max={item.quantity}
 										className="w-full"
 										disabled={isSubmitting}

@@ -16,14 +16,14 @@ const INVENTORY_COLLECTION = "inventory";
 const USAGE_HISTORY_COLLECTION = "usage_history"; // New collection for tracking usage
 
 // Interface for usage history documents
-interface UsageHistoryDocument {
-	itemId: ObjectId;
-	itemName: string;
-	quantityUsed: number;
-	usedDate: Date;
-	userId?: string; // Optional: track who used the item
-	notes?: string; // Optional: additional notes
-}
+// interface UsageHistoryDocument {
+// 	itemId: ObjectId;
+// 	itemName: string;
+// 	quantityUsed: number;
+// 	usedDate: Date;
+// 	userId?: string; // Optional: track who used the item
+// 	notes?: string; // Optional: additional notes
+// }
 
 const fromMongoDB = (doc: WithId<Document>): InventoryItem => {
 	const convertDateToISO = (date: Date | string): string | undefined => {
@@ -524,7 +524,7 @@ export async function deleteInventoryItem(id: string): Promise<boolean> {
 		const collection = db.collection(INVENTORY_COLLECTION);
 		const usageCollection = db.collection(USAGE_HISTORY_COLLECTION);
 
-		const [itemResult, usageResult] = await Promise.all([
+		const [itemResult] = await Promise.all([
 			collection.deleteOne({ _id: new ObjectId(id) }),
 			usageCollection.deleteMany({ itemId: new ObjectId(id) }),
 		]);

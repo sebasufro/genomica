@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Home, List, PlusSquare, UserCircle, BarChart3 } from "lucide-react"; // Using BarChart3 for GenAI logo placeholder
+import { Home, List, PlusSquare, BarChart3 } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { UserCircle } from "lucide-react";
 
 export const metadata: Metadata = {
 	title: "BioTrackr Inventario",

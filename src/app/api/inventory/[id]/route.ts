@@ -3,9 +3,9 @@ import {
 	getInventoryItemById,
 	updateInventoryItem,
 	deleteInventoryItem,
-	getRecentlyUsedItems,
-	recordItemUsage,
-	getItemUsageStats,
+	// getRecentlyUsedItems,
+	// recordItemUsage,
+	// getItemUsageStats,
 } from "@/lib/data";
 
 export async function GET(

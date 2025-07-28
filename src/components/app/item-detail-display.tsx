@@ -7,6 +7,8 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import {
@@ -122,10 +124,12 @@ export function ItemDetailDisplay({ item, className }: ItemDetailDisplayProps) {
     <Card className={cn("w-full", className)}>
       <CardHeader>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <CardTitle className="text-2xl font-headline flex items-center gap-2">
-            {itemIcon()} {item.name}
-          </CardTitle>
-          {getStatusBadge(item)}
+          <div className="flex-1">
+            <CardTitle className="text-2xl font-headline flex items-center gap-2">
+              {itemIcon()} {item.name}
+            </CardTitle>
+            <div className="mt-1">{getStatusBadge(item)}</div>
+          </div>
         </div>
         <CardDescription>
           {item.category || "Sin categorizar"} -{" "}

@@ -6,7 +6,7 @@ import {
   getRecentlyUsedItems,
   getTotalItemsCount,
   getTotalReagentsCount,
-  getMockReagentUsageData,
+  getReagentUsageData,
 } from "@/lib/data";
 
 export async function GET() {
@@ -27,7 +27,7 @@ export async function GET() {
       getRecentlyUsedItems(inventory, 7),
     ]);
 
-    const reagentUsageData = getMockReagentUsageData();
+    const reagentUsageData = await getReagentUsageData();
 
     const stats = {
       totalItems: totalItemsCount,

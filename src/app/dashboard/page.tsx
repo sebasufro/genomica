@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { InventoryItem, ReagentUsageDataPoint } from "@/lib/types";
+import type { InventoryItem } from "@/lib/types";
 import { DashboardMetricCard } from "@/components/app/dashboard-metric-card";
 import { QuickActionsCard } from "@/components/app/quick-actions-card";
 import { ReagentUsageChart } from "@/components/app/reagent-usage-chart";
@@ -36,9 +36,6 @@ export default function DashboardPage() {
 		nearingExpiration: [],
 		recentlyUsed: [],
 	});
-	const [reagentUsageData, setReagentUsageData] = useState<
-		ReagentUsageDataPoint[]
-	>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const isMobile = useIsMobile();
 
@@ -47,9 +44,8 @@ export default function DashboardPage() {
 			setIsLoading(true);
 			try {
 				const res = await fetch("/api/dashboard");
-				const { stats, reagentUsageData } = await res.json();
+				const { stats } = await res.json();
 				setStats(stats);
-				setReagentUsageData(reagentUsageData);
 			} catch (error) {
 				console.error("Error fetching dashboard data:", error);
 			} finally {
@@ -171,16 +167,11 @@ export default function DashboardPage() {
 					<CardContent
 						className={cn("pr-0", isMobile ? "h-[200px]" : "h-[300px]")}
 					>
-						{reagentUsageData.length > 0 ? (
-							<ReagentUsageChart data={reagentUsageData} />
-						) : (
-							<div className="flex items-center justify-center h-full text-muted-foreground">
-								<p>No hay datos de uso disponibles.</p>
-							</div>
-						)}
+						<ReagentUsageChart />
 					</CardContent>
 				</Card>
 			</div>
+
 		</div>
 	);
 }

@@ -16,11 +16,7 @@ import {
 } from "recharts";
 import { AlertTriangle } from "lucide-react";
 
-interface ReagentUsageChartProps {
-	data: ReagentUsageDataPoint[];
-	isLoading?: boolean;
-	error?: string;
-}
+import { useEffect, useState } from "react";
 
 const chartConfig = {
 	usage: {
@@ -29,11 +25,32 @@ const chartConfig = {
 	},
 };
 
-export function ReagentUsageChart({
-	data,
-	isLoading = false,
-	error,
-}: ReagentUsageChartProps) {
+export function ReagentUsageChart() {
+	const [data, setData] = useState<ReagentUsageDataPoint[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setIsLoading(true);
+			setError(null);
+			try {
+				const res = await fetch("/api/dashboard");
+				if (!res.ok) {
+					throw new Error("Failed to fetch data");
+				}
+				const { reagentUsageData } = await res.json();
+				setData(reagentUsageData);
+			} catch (err) {
+				setError(err instanceof Error ? err.message : "An unknown error occurred");
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+	}, []);
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center h-full text-muted-foreground">
