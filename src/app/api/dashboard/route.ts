@@ -6,7 +6,7 @@ import {
   getRecentlyUsedItems,
   getTotalItemsCount,
   getTotalReagentsCount,
-  getReagentUsageData,
+  getAllItemsUsageData,
 } from "@/lib/data";
 
 export async function GET() {
@@ -27,7 +27,7 @@ export async function GET() {
       getRecentlyUsedItems(inventory, 7),
     ]);
 
-    const reagentUsageData = await getReagentUsageData();
+    const allItemsUsageData = await getAllItemsUsageData();
 
     const stats = {
       totalItems: totalItemsCount,
@@ -37,7 +37,7 @@ export async function GET() {
       recentlyUsed: recentlyUsedItems,
     };
 
-    return NextResponse.json({ stats, reagentUsageData });
+    return NextResponse.json({ stats,  allItemsUsageData });
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -41,6 +41,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 // Types for usage data
 interface UsageHistoryItem {
@@ -399,10 +400,10 @@ export default function InventoryItemDetailPage() {
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{loadingUsageData ? (
-								<div className="bg-muted/50 p-4 rounded-lg flex items-center justify-center h-[90px]">
-									<Loader2 className="h-8 w-8 animate-spin text-primary" />
-								</div>
-							) : (
+    						    <div className="bg-muted/50 p-4 rounded-lg flex items-center justify-center h-[90px]">
+    						        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    						    </div>
+    						) : (
 								<div className="bg-muted/50 p-4 rounded-lg flex items-center justify-center h-[90px]">
 									<BarChart2
 										className="h-12 w-12 text-primary"

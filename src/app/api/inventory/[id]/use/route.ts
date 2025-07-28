@@ -3,7 +3,10 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { revalidatePath } from "next/cache";
 
-export async function POST(req: Request, context: { params: { id: string } }) {
+export async function POST(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const { db } = await connectToDatabase();
     const { quantityUsed, userId, notes } = await req.json();

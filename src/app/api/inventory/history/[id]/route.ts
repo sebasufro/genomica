@@ -21,7 +21,15 @@ export async function GET(
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
 
-    const usageHistory = (item.usageHistory || []).map((entry: any) => ({
+    type UsageHistoryEntry = {
+      date?: Date | string;
+      quantityUsed: number;
+      notes?: string;
+      userId?: string | ObjectId;
+      [key: string]: unknown;
+    };
+
+    const usageHistory = (item.usageHistory || []).map((entry: UsageHistoryEntry) => ({
       ...entry,
       date: entry.date ? new Date(entry.date).toISOString() : undefined,
       userId: entry.userId ? entry.userId.toString() : undefined,

@@ -303,6 +303,47 @@ export async function getReagentUsageData(
 	}
 }
 
+export async function getAllItemsUsageData(daysBack: number = 7): Promise<ReagentUsageDataPoint[]> {
+    try {
+        const db = await getDatabase();
+        const usageCollection = db.collection(USAGE_HISTORY_COLLECTION);
+        const endDate = today;
+        const startDate = subDays(endDate, daysBack - 1);
+        const days = eachDayOfInterval({ start: startDate, end: endDate });
+
+        const usageData = await usageCollection
+            .aggregate([
+                {
+                    $match: {
+                        usedDate: {
+                            $gte: startOfDay(startDate),
+                            $lte: endOfDay(endDate),
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: {
+                            $dateToString: { format: "%Y-%m-%d", date: "$usedDate" },
+                        },
+                        totalUsage: { $sum: "$quantityUsed" },
+                    },
+                },
+                { $sort: { _id: 1 } },
+            ])
+            .toArray();
+
+        const usageMap = new Map(usageData.map((item) => [item._id, item.totalUsage]));
+        return days.map((day) => ({
+            date: format(day, "MMM dd"),
+            usage: usageMap.get(format(day, "yyyy-MM-dd")) || 0,
+        }));
+    } catch (error) {
+        console.error("Error getting all items usage data:", error);
+        return getMockReagentUsageData();
+    }
+}
+
 // NEW: Get usage history for a specific item
 export async function getItemUsageHistory(
 	itemId: string,

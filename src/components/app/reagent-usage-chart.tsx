@@ -39,8 +39,8 @@ export function ReagentUsageChart() {
 				if (!res.ok) {
 					throw new Error("Failed to fetch data");
 				}
-				const { reagentUsageData } = await res.json();
-				setData(reagentUsageData);
+				const { allItemsUsageData } = await res.json();
+				setData(allItemsUsageData);
 			} catch (err) {
 				setError(err instanceof Error ? err.message : "An unknown error occurred");
 			} finally {
