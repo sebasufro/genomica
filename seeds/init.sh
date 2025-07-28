@@ -1,0 +1,2 @@
+mongoimport --username root --password rootpass --authenticationDatabase admin --db BIOREN --collection storageTypes --file /docker-entrypoint-initdb.d/storageTypes.json --jsonArray
+mongoimport --username root --password rootpass --authenticationDatabase admin --db BIOREN --collection storageNames --file /docker-entrypoint-initdb.d/storageNames.json --jsonArray

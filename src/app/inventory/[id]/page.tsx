@@ -41,7 +41,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 // Types for usage data
 interface UsageHistoryItem {

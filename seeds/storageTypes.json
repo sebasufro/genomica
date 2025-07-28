@@ -1,0 +1,6 @@
+[
+    { "type": "Cabinet" },
+    { "type": "Fridge" },
+    { "type": "Freezer" },
+    { "type": "Shelf" }
+]
