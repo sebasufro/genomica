@@ -23,6 +23,7 @@ services:
       - MONGO_INITDB_DATABASE=BIOREN
     volumes:
       - mongo_data:/data/db
+      - ./seeds:/docker-entrypoint-initdb.d/
     restart: unless-stopped
 
 volumes:

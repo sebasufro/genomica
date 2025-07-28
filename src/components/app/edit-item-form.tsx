@@ -1,4 +1,3 @@
-// src/components/app/add-item-form.tsx
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,13 +28,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Loader2, ScanLine } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, formatISO } from "date-fns";
+import { format, formatISO, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import type { ItemType, StorageLocationType, InventoryItem } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const itemTypes: { value: ItemType; label: string }[] = [
@@ -104,13 +103,15 @@ const formSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-type AddItemFormValues = z.infer<typeof formSchema>;
+type EditItemFormValues = z.infer<typeof formSchema>;
 
-export function AddItemForm() {
+interface EditItemFormProps {
+  item: InventoryItem;
+}
+
+export function EditItemForm({ item }: EditItemFormProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const barcode = searchParams.get("barcode");
   const [storageOptions, setStorageOptions] = useState<{
     storageLocationTypes: string[];
     storageLocationNames: string[];
@@ -132,85 +133,37 @@ export function AddItemForm() {
     fetchStorageOptions();
   }, []);
 
-  const form = useForm<AddItemFormValues>({
+  const form = useForm<EditItemFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      type: itemTypes[0].value,
-      category: predefinedCategories[0],
-      quantity: 0,
-      unit: "",
-      storageLocationType:
-        storageLocationTypes.find((slt) => slt.label === "Temperatura Ambiente")
-          ?.value || storageLocationTypes[0].value,
-      storageLocationName: "",
-      lowStockThreshold: 0,
+      ...item,
+      expirationDate: item.expirationDate
+        ? parseISO(item.expirationDate)
+        : undefined,
+      storageLocationType: item.storageLocation.type,
+      storageLocationName: item.storageLocation.name,
+      storageLocationDetails: item.storageLocation.details,
     },
   });
 
-  // AUTOCOMPLETADO POR BARCODE
-  useEffect(() => {
-    if (barcode) {
-      fetch(`/api/getItemByBarcode?barcode=${barcode}`)
-        .then((res) => {
-          if (!res.ok) throw new Error();
-          return res.json();
-        })
-        .then((data) => {
-          form.reset({
-            name: data.name || "",
-            type: data.type || itemTypes[0].value,
-            category: data.category || predefinedCategories[0],
-            lotNumber: data.lotNumber || "",
-            provider: data.provider || "",
-            barcode: data.barcode || barcode,
-            quantity: 0,
-            unit: data.unit || "",
-            storageLocationType: data.storageLocation?.type || storageLocationTypes[0].value,
-            storageLocationName: data.storageLocation?.name || "",
-            storageLocationDetails: data.storageLocation?.details || "",
-            expirationDate: undefined,
-            temperature: data.temperature || "",
-            lowStockThreshold: data.lowStockThreshold || 0,
-            notes: data.notes || "",
-          });
-        })
-        .catch(() => {
-          // Si no existe, al menos precarga el barcode
-          form.setValue("barcode", barcode);
-        });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [barcode]);
-
-  async function onSubmit(values: AddItemFormValues) {
-    const newItemData: Omit<InventoryItem, "id" | "addedDate" | "imageUrl"> = {
-      name: values.name,
-      type: values.type,
-      category: values.category,
-      lotNumber: values.lotNumber,
-      provider: values.provider,
-      barcode: values.barcode,
-      quantity: values.quantity,
-      unit: values.unit,
+  async function onSubmit(values: EditItemFormValues) {
+    const updatedItemData = {
+      ...values,
+      expirationDate: values.expirationDate
+        ? formatISO(values.expirationDate, { representation: "date" })
+        : undefined,
       storageLocation: {
         type: values.storageLocationType,
         name: values.storageLocationName,
         details: values.storageLocationDetails,
       },
-      expirationDate: values.expirationDate
-        ? formatISO(values.expirationDate, { representation: "date" })
-        : undefined,
-      temperature: values.temperature,
-      lowStockThreshold: values.lowStockThreshold,
-      notes: values.notes,
     };
 
     try {
-      const res = await fetch("/api/addItem", {
-        method: "POST",
+      const res = await fetch(`/api/inventory/${item.id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newItemData),
+        body: JSON.stringify(updatedItemData),
       });
 
       if (!res.ok) {
@@ -218,18 +171,19 @@ export function AddItemForm() {
         throw new Error(errorData.error || "Unknown error");
       }
 
-      const addedItem = await res.json();
+      const updatedItem = await res.json();
       toast({
-        title: "Insumo Añadido",
-        description: `${addedItem.name} ha sido añadido al inventario exitosamente.`,
+        title: "Insumo Actualizado",
+        description: `${updatedItem.name} ha sido actualizado exitosamente.`,
       });
-      router.push(`/inventory/${addedItem.id}`);
+      router.refresh();
+      router.push(`/inventory/${updatedItem.id}`);
     } catch (error) {
-      console.error("Error adding item:", error);
+      console.error("Error updating item:", error);
       toast({
-        title: "Error al Añadir",
+        title: "Error al Actualizar",
         description:
-          "No se pudo añadir el insumo al inventario. Inténtalo de nuevo.",
+          "No se pudo actualizar el insumo. Inténtalo de nuevo.",
         variant: "destructive",
       });
     }
@@ -371,29 +325,7 @@ export function AddItemForm() {
               <FormItem>
                 <FormLabel>Código de Barras</FormLabel>
                 <FormControl>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      placeholder="Introducir o escanear código"
-                      {...field}
-                      className="flex-grow"
-                      // readOnly // Descomenta si quieres que sea solo lectura
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => {
-                        toast({
-                          title: "Función No Implementada",
-                          description:
-                            "El escaneo de código de barras estará disponible próximamente.",
-                        });
-                      }}
-                      aria-label="Escanear código de barras"
-                    >
-                      <ScanLine className="h-5 w-5" />
-                    </Button>
-                  </div>
+                  <Input placeholder="Introducir o escanear código" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -559,7 +491,7 @@ export function AddItemForm() {
           {form.formState.isSubmitting && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          Añadir Insumo al Inventario
+          Guardar Cambios
         </Button>
       </form>
     </Form>
